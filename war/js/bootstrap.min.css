@@ -1,0 +1,810 @@
+var patiendID		= "";
+var fetchstatus = "false";
+var querytotable = "";
+var urltocals = "";
+$(document).ready(function()
+{
+	$( "#go" ).click(function() {
+		  $('#signupbox').show();
+		  $('#signinbox').hide();
+		});
+	$( "#goin" ).click(function() {
+		  $('#signupbox').hide();
+		  $('#signinbox').show();
+		})
+	$("#remedy").click(function(){
+		callremedyteam();
+	});
+	$( "#savepatient" ).click(function() {
+		savepatients();
+	});
+	$( "#signmein" ).click(function() {
+		login();
+		});
+	$( "#signmeuppatient" ).click(function() {
+		 patientregisterr();
+		});
+	$( "#signmeupdoctor" ).click(function() {
+		 doctorregisterr();
+		});
+	$('#subscribe').click(function()  {
+		subscribe();
+	});
+	$('#reserv').click(function()  {
+		reservation();
+	});
+	$('#fetchstatus').click(function()  {
+		fetchstatuss();
+	});
+	$('#prescribe').click(function(){
+		prescribe();
+	});
+	$('#sendEmail').click(function(){
+		sendemail();
+	});
+	$('#patientpart').hide();
+	$('#doctorspart').hide();
+	$('#doctorspartsignup').hide();
+	$('#patientpartsignup').hide();
+});
+function sendemail()
+{
+	var emailto = $('#emails').val();
+	var subj = $('#subject').val();
+	var textmsg = $('#textmsg').val();
+	var patientIDroll			=	 $('#hjbjbhj').val();
+	 var patientemail 			=	 $('#patientemail').val();
+	 var patientName 			=	 $('#patientname').val();
+	 var bloodgroup				=	 $('#bloodgroup').val();
+	 var pressure 				=	 $('#pressure').val();
+	 var height					=	 $('#height').val();
+	 var weight					=	 $('#weight').val();
+	 var bmi					=	 $('#bmi').val();	
+	 var surgerey				=	 $('input:radio[name=surgerys]:checked').val();
+	 var excersise				=	 $('#excersise').val();
+	 var problem				=	 $('#problem').val();
+	 var gender					= 	 $('input:radio[name=optionsRadio]:checked').val();
+	if(emailto==null || subj==null || textmsg==null || emailto=='' || subj=='' || textmsg=='')
+	{
+		if(emailto==null || emailto=='') 
+		{
+			$('#emails').css('background-color','rgb(176, 199, 221)');
+   			$('#emails').css('color','black');
+   			$('#emails').val("Invalid Email");
+		}
+		if(subj==null || subj=='')
+		{
+			$('#subject').css('background-color','rgb(176, 199, 221)');
+   			$('#subject').css('color','black');
+   			$('#subject').val("Invalid Mail Subject");
+		}
+		if(textmsg==null || textmsg=='')
+		{
+			$("#yesbutton").on("click", function(e) {
+	            console.log("button pressed");   // just as an example...
+	            $("#myModals").modal('hide');  
+	        });
+			$("#myModals").modal({                    // wire up the actual modal functionality and show the dialog
+			      "backdrop"  : "static",
+			      "keyboard"  : true,
+			      "show"      : true                     // ensure the modal is shown immediately
+			    });
+			$('#textmsg').css('background-color','rgb(176, 199, 221)');
+   			$('#textmsg').css('color','black');
+   			$('#textmsg').val("Invalid Message");
+		}
+	}
+	else
+	{
+		$.ajax({
+			type	: 'POST', 
+			url		: '/sendEmail' ,
+			data	: {emailto:emailto,subj:subj,textmsg:textmsg,patientIDroll:patientIDroll,patientemail:patientemail,patientName:patientName,bloodgroup:bloodgroup,pressure:pressure,height:height,weight:weight,bmi:bmi,surgerey:surgerey,excersise:excersise,problem:problem,gender:gender},
+			success	: function(data)
+					  {
+//							$("#successmsg").modal({                    // wire up the actual modal functionality and show the dialog
+//							      "backdrop"  : "static",
+//							      "keyboard"  : true,
+//							      "show"      : true                     // ensure the modal is shown immediately
+//							});
+//							$("#successbtn").on("click", function(e) {
+//					            $("#successmsg").modal('hide'); 
+//					            $("#myModal").modal({                    // wire up the actual modal functionality and show the dialog
+//								      "backdrop"  : "static",
+//								      "keyboard"  : true,
+//								      "show"      : true                     // ensure the modal is shown immediately
+//								});
+//					        });
+					  }
+ 			});
+	}
+}
+function setdoctor()
+{
+	 var selectbox 		=  $( "#doctorslist option:selected" ).text();
+	 console.log("the setdoctor mode :: "+selectbox);
+	 $('#doctorname').val(selectbox);
+}
+function setproblem()
+{
+	var setproblem =  $( "#problemlist option:selected" ).text(); 
+	 console.log("the setproblem mode :: "+setproblem);
+	 $('#problem').val(setproblem);
+}
+
+function querytable()
+{
+	 var selectbox 		=  $( "#myselects option:selected" ).text();
+	 console.log("the current mode :: "+selectbox);
+	 querytotable = selectbox;
+}
+function login()
+{
+	var sessionName	= $('#username').val();
+	var password 	= $('#Password').val();
+	if(sessionName==null || sessionName=='' || password==null || password== '')
+	{
+		$('#username').css('background-color','rgb(223, 151, 151)');
+		$('#username').val("Please fill your details");
+	}
+	else
+	{
+		   if(querytotable=="Doctor")
+		   {
+			   console.log("going to query :: "+querytotable);
+			    urltocals        = '/doctorentry?email='+encodeURIComponent(sessionName)+'&password='+encodeURIComponent(password);
+		   }
+		   else
+		   {
+			   console.log("going to query :: "+querytotable);
+			    urltocals       = '/checkentry?email='+encodeURIComponent(sessionName)+'&password='+encodeURIComponent(password);
+		   }
+		    var selectbox 		=  $( "#myselects option:selected" ).text();
+			cookies.setRegistrationUrlmode(selectbox);
+			$('#spinner').show();
+			$.ajax({
+					type	: 'POST', 
+					url		: urltocals ,
+					data	: '',
+					success	: function(data)
+							  {
+									console.log("Daddsa "+data);
+									if(data!="failure")
+									{
+//										$("#loginmsgtrue").modal({                    // wire up the actual modal functionality and show the dialog
+//											"backdrop"  : "static",
+//											"keyboard"  : true,
+//											"show"      : true                     // ensure the modal is shown immediately
+//										});
+									}
+									else
+									{
+//										$("#loginmsgfalse").modal({                    // wire up the actual modal functionality and show the dialog
+//											"backdrop"  : "static",
+//											"keyboard"  : true,
+//											"show"      : true                     // ensure the modal is shown immediately
+//										});
+									}
+//									$("#loginmsgfalsebtn").on("click", function(e) {
+//										console.log("button pressed");   // just as an example...
+//										$("#loginmsgfalse").modal('hide'); 
+//										window.location.href="/register.jsp";
+//									});
+									
+								
+									
+							  }
+		 			});
+		}
+}
+//function patientregisterr()
+//{
+//		 var firstname 		=	 $('#firstname').val();
+//		 var email 			=	 $('#email').val();
+//		 var phonenumber 	=	 $('#phonenumber').val();
+//		 var password		= 	 $('#password').val();
+//		 var address		= 	 $('#address').val();
+//		 var zip			= 	 $('#zip').val();
+//		 var nearby			= 	 $('#nearby').val();
+//	     var reg_email		=	/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+//		 var regnum			=	/^[0-9-+]+$/;
+//		 var dates			= 	new Date();
+//		 var selectbox 		=  $( "#myselect option:selected" ).text();
+//		 
+//		 if((firstname=="") || (email=="") || (phonenumber=="") || (password=="") || (address=="") || (zip==""))
+//		  {
+//			 if(firstname==null || firstname=='')
+//				{
+//					$('#firstname').css('background-color','rgb(176, 199, 221)');
+//	       			$('#firstname').css('color','black');
+//	       			$('#firstname').val("Invalid Name");
+//				}
+//			 if(email==null || email=='')
+//				{
+//					$('#email').css('background-color','rgb(176, 199, 221)');
+//	       			$('#email').css('color','black');
+//	       			$('#email').val("Invalid Email");
+//				}
+//			 if(phonenumber==null || phonenumber=='')
+//				{
+//					$('#phonenumber').css('background-color','rgb(176, 199, 221)');
+//	       			$('#phonenumber').css('color','black');
+//	       			$('#phonenumber').val("Invalid Phonenumber");
+//				}
+//			 if(password==null || password=='')
+//				{
+//					$('#password').css('background-color','rgb(176, 199, 221)');
+//	       			$('#password').css('color','black');
+//	       			$('#password').val("Invalid password");
+//				}
+//			 if(address==null || address=='')
+//				{
+//					$('#address').css('background-color','rgb(176, 199, 221)');
+//	       			$('#address').css('color','black');
+//	       			$('#address').val("Invalid address");
+//				}
+//			 if(zip==null || zip=='')
+//				{
+//					$('#zip').css('background-color','rgb(176, 199, 221)');
+//	       			$('#zip').css('color','black');
+//	       			$('#zip').val("Invalid zip");
+//				}
+//			 if(nearby==null || nearby=='')
+//				{
+//					$('#nearby').css('background-color','rgb(176, 199, 221)');
+//	       			$('#nearby').css('color','black');
+//	       			$('#nearby').val("Invalid text");
+//				}
+//		  }
+//		  else
+//		  {
+//			  hjbjbhj		= document.getElementById('hjbjbhj').value;
+//			  console.log("firstname :: "+firstname);
+//			  console.log("firstnpatheintame :: "+hjbjbhj);
+//			  console.log("email :: "+email);
+//			  console.log("phonenumber :: "+phonenumber);
+//			  console.log("password :: "+password);
+//			  console.log("address :: "+address);
+//			  console.log("zip :: "+zip);
+//			  console.log("nearby :: "+nearby);
+//			  console.log("selectbox :: "+selectbox);
+//		 	 	$.ajax({
+//						type	: 'POST', 
+//						url		: '/registerations' ,
+//						data	: {firstname:firstname,kjnijihiuh:hjbjbhj,email:email,phonenumber:phonenumber,password:password,address:address,zip:zip,nearby:nearby,selectbox:selectbox},
+//						success	: function(data)
+//						{
+//							console.log("dafsd :: "+data);
+//								$("#registerfailbtn").on("click", function(e) {
+//									console.log("button pressed");   // just as an example...
+//									$("#registerfailmsg").modal('hide'); 
+//								});
+//								$("#registersuccessbtn").on("click", function(e) {
+//									console.log("button pressed");   // just as an example...
+//									$("#registersuccessmsg").modal('hide'); 
+//									window.location.href="/login.jsp";
+//								});
+//								if(data=="failure")
+//								{
+//									$("#registerfailmsg").modal({                    // wire up the actual modal functionality and show the dialog
+//										"backdrop"  : "static",
+//										"keyboard"  : true,
+//										"show"      : true                     // ensure the modal is shown immediately
+//									});
+//								}
+//								else
+//								{
+//									$("#registersuccessmsg").modal({                    // wire up the actual modal functionality and show the dialog
+//										"backdrop"  : "static",
+//										"keyboard"  : true,
+//										"show"      : true                     // ensure the modal is shown immediately
+//									});
+//								}
+//						}
+//		 		 		});
+//		 	 }
+//}
+//function doctorregisterr()
+//{
+//		 var firstname 		=	 $('#doctorfirstname').val();
+//		 var email 			=	 $('#doctoremail').val();
+//		 var phonenumber 	=	 $('#doctorphonenumber').val();
+//		 var password		= 	 $('#doctorpassword').val();
+//		 var docid			= 	document.getElementById('dochjbjbhj').value;
+//		 var specialize		= 	 $('#specialize').val();
+//		 var qualificaiton			= 	 $('#qualificaiton').val();
+//	     var reg_email		=	/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+//		 var regnum			=	/^[0-9-+]+$/;
+//		 var dates			= 	new Date();
+//		 var selectbox 		=  $( "#myselect option:selected" ).text();
+//		 
+//		 if((firstname=="") || (email=="") || (phonenumber=="") || (password=="")  || (specialize=="") || (qualificaiton==""))
+//		  {
+//			 if(firstname==null || firstname=='')
+//				{
+//					$('#firstname').css('background-color','rgb(176, 199, 221)');
+//	       			$('#firstname').css('color','black');
+//	       			$('#firstname').val("Invalid Name");
+//				}
+//			 if(email==null || email=='')
+//				{
+//					$('#email').css('background-color','rgb(176, 199, 221)');
+//	       			$('#email').css('color','black');
+//	       			$('#email').val("Invalid Email");
+//				}
+//			 if(phonenumber==null || phonenumber=='')
+//				{
+//					$('#phonenumber').css('background-color','rgb(176, 199, 221)');
+//	       			$('#phonenumber').css('color','black');
+//	       			$('#phonenumber').val("Invalid Phonenumber");
+//				}
+//			 if(password==null || password=='')
+//				{
+//					$('#password').css('background-color','rgb(176, 199, 221)');
+//	       			$('#password').css('color','black');
+//	       			$('#password').val("Invalid password");
+//				}
+//			 if(qualificaiton==null || qualificaiton=='')
+//				{
+//					$('#qualificaiton').css('background-color','rgb(176, 199, 221)');
+//	       			$('#qualificaiton').css('color','black');
+//	       			$('#qualificaiton').val("Invalid address");
+//				}
+//			 if(specialize==null || specialize=='')
+//				{
+//					$('#specialize').css('background-color','rgb(176, 199, 221)');
+//	       			$('#specialize').css('color','black');
+//	       			$('#specialize').val("Invalid zip");
+//				}
+//		  }
+//		  else
+//		  {
+//			  console.log("firstname :: "+firstname);
+//			  console.log("docid :: "+docid);
+//			  console.log("email :: "+email);
+//			  console.log("phonenumber :: "+phonenumber);
+//			  console.log("password :: "+password);
+//			  console.log("qualificaiton :: "+qualificaiton);
+//			  console.log("specialize :: "+specialize);
+//		 	  $.ajax({
+//						type	: 'POST', 
+//						url		: '/doctorregisterations' ,
+//						data	: {firstname:firstname,docid:docid,email:email,phonenumber:phonenumber,password:password,qualificaiton:qualificaiton,specialize:specialize},
+//						success	: function(data)
+//						{
+//							$("#registerfailbtn").on("click", function(e) {
+//								console.log("button pressed");   // just as an example...
+//								$("#registerfailmsg").modal('hide'); 
+//							});
+//							$("#registersuccessbtn").on("click", function(e) {
+//								console.log("button pressed");   // just as an example...
+//								$("#registersuccessmsg").modal('hide'); 
+//								window.location.href="/login.jsp";
+//							});
+//							if(data=="failure")
+//							{
+//								$("#registerfailmsg").modal({                    // wire up the actual modal functionality and show the dialog
+//									"backdrop"  : "static",
+//									"keyboard"  : true,
+//									"show"      : true                     // ensure the modal is shown immediately
+//								});
+//							}
+//							else
+//							{
+//								$("#registersuccessmsg").modal({                    // wire up the actual modal functionality and show the dialog
+//									"backdrop"  : "static",
+//									"keyboard"  : true,
+//									"show"      : true                     // ensure the modal is shown immediately
+//								});
+//							}
+//						}
+//		 		 });
+//		 	 }
+//} 
+//function savepatients()
+//{
+//	 var patientName 			=	 $('#patientname').val();
+//	 var patientemail 			=	 $('#patientemail').val();
+//	 var patientvisiteddate 	=	 $('#visitdate').val();
+//	 var patientnextvisit 		=	 $('#nextvisit').val();
+//	 var patientphone 			=	 $('#patientphone').val();
+//	 var patientID				=	 $('#examplepatientID').val();
+//	 var patientAddress			= 	 $('#patientaddress').val();
+//	 var patientAilment			= 	 $('#patientailment').val();
+//	 var doctorname				= 	 $('#doctorname').val();
+//	 var hospital				= 	 $('#hospital').val();
+//	 var gender					= 	 $('input:radio[name=optionsRadios]:checked').val();
+//	 if((patientName=="") || (patientemail=="") || (patientvisiteddate=="") || (patientnextvisit=="")
+//			 || (patientphone=="") || (patientAddress=="") || (patientAilment=="")
+//			 || (doctorname=="") || (hospital=="") || (patientID==""))
+//	  {
+//		 if(patientName==null || patientName=='')
+//			{
+//				$('#patientname').css('background-color','rgb(176, 199, 221)');
+//      			$('#firpatientnamestname').css('color','black');
+//      			$('#patientname').val("Invalid Name");
+//			}
+//		 if(patientemail==null || patientemail=='')
+//			{
+//				$('#patientemail').css('background-color','rgb(176, 199, 221)');
+//      			$('#patientemail').css('color','black');
+//      			$('#patientemail').val("Invalid Email");
+//			}
+//		 if(patientvisiteddate==null || patientvisiteddate=='')
+//			{
+//				$('#visitdate').css('background-color','rgb(176, 199, 221)');
+//      			$('#visitdate').css('color','black');
+//      			$('#visitdate').val("Invalid Text");
+//			}
+//		 if(patientnextvisit==null || patientnextvisit=='')
+//			{
+//				$('#nextvisit').css('background-color','rgb(176, 199, 221)');
+//      			$('#nextvisit').css('color','black');
+//      			$('#nextvisit').val("Invalid Text");
+//			}
+//		 if(patientphone==null || patientphone=='')
+//			{
+//				$('#patientphone').css('background-color','rgb(176, 199, 221)');
+//   			$('#patientphone').css('color','black');
+//   			$('#patientphone').val("Invalid Phone");
+//			}
+//		 if(patientAddress==null || patientAddress=='')
+//			{
+//				$('#patientaddress').css('background-color','rgb(176, 199, 221)');
+//			$('#patientaddress').css('color','black');
+//			$('#patientaddress').val("Invalid Address");
+//			}
+//		 if(patientAilment==null || patientAilment=='')
+//			{
+//				$('#patientailment').css('background-color','rgb(176, 199, 221)');
+//				$('#patientailment').css('color','black');
+//				$('#patientailment').val("Invalid Text");
+//			}
+//		 if(doctorname==null || doctorname=='')
+//			{
+//				$('#doctorname').css('background-color','rgb(176, 199, 221)');
+//				$('#doctorname').css('color','black');
+//				$('#doctorname').val("Invalid Text");
+//			}
+//		 if(hospital==null || hospital=='')
+//			{
+//			 	$('#hospital').css('background-color','rgb(176, 199, 221)');
+//				$('#hospital').css('color','black');
+//				$('#hospital').val("Invalid Text");
+//			}
+//		 if(patientID==null || patientID=='')
+//		 {
+//			 	$('#examplepatientID').css('background-color','rgb(176, 199, 221)');
+//			 	$('#examplepatientID').css('color','black');
+//			 	$('#examplepatientID').val("Invalid Text");
+//		 }
+//		 
+//	  }
+//	  else
+//		  {
+//		  	 var patientName 			=	 $('#patientname').val();
+//			 var patientemail 			=	 $('#patientemail').val();
+//			 var patientvisiteddate 	=	 $('#visitdate').val();
+//			 var patientnextvisit 		=	 $('#nextvisit').val();
+//			 var patientphone 			=	 $('#patientphone').val();
+//			 var patientAddress			= 	 $('#patientaddress').val();
+//			 var patientAilment			= 	 $('#patientailment').val();
+//			 var doctorname				= 	 $('#doctorname').val();
+//			 var hospital				= 	 $('#hospital').val();
+//			 var gender					= 	 $('input:radio[name=optionsRadios]:checked').val();
+//		  		$.ajax({
+//				type	: 'POST', 
+//				url		: '/savepatient' ,
+//				async	: true,
+//				data	: {patientName:patientName,patientID:patientID,patientemail:patientemail,patientAddress:patientAddress,patientAilment:patientAilment,doctorname:doctorname,hospital:hospital,gender:gender,patientvisiteddate:patientvisiteddate,patientnextvisit:patientnextvisit,patientphone:patientphone},
+//				success	: function(data)
+//						  {
+//								$("#patientnewbtn").on("click", function(e) {
+//									console.log("button pressed");   // just as an example...
+//									$("#addpatientnew").modal('hide'); 
+//								});
+//								$("#patientfailnewbtn").on("click", function(e) {
+//									console.log("button pressed");   // just as an example...
+//									$("#addfailpatientnew").modal('hide'); 
+//								});
+//								if(data!="failure")
+//								{
+//									$("#addpatientnew").modal({                    // wire up the actual modal functionality and show the dialog
+//										"backdrop"  : "static",
+//										"keyboard"  : true,
+//										"show"      : true                     // ensure the modal is shown immediately
+//									});
+//								}
+//								else
+//								{
+//									$("#addfailpatientnew").modal({                    // wire up the actual modal functionality and show the dialog
+//										"backdrop"  : "static",
+//										"keyboard"  : true,
+//										"show"      : true                     // ensure the modal is shown immediately
+//									});
+//								}
+//						  }
+//			});
+//		  }
+//}
+//function prescribe()
+//{
+//	if(fetchstatus!="true")
+//	{
+//		alert("Please fetch the patient ID to proceed");
+//	}
+//	else
+//	{
+//		var prescribearray = [];
+//		console.log($('input[name="prescribemedicine"]:checked').serialize());
+//		$('input[name="prescribemedicine"]:checked').each(function() {
+//			   console.log(this.value); 
+//			   var hello = this.value;
+//			   prescribearray.push(hello);
+//			});
+//		var logggedin  = $('#patientemail').val();
+//		var prescribe = "";
+//		for(var subs=0; subs<prescribearray.length;subs++)
+//		{
+//			prescribe=prescribe+prescribearray[subs]+",";
+//		}
+//		$.ajax({
+//			type	: 'POST', 
+//			url		: '/prescribe' ,
+//			async	: true,
+//			data	: {logggedin:logggedin,prescribearray:prescribe},
+//			success	: function(data)
+//					  {
+//							if(data=="success")
+//							{
+//								alert("Tablets Successfully Added");
+//							}
+//							else
+//							{
+//								var pateintID = $('#hjbjbhj').val();
+//								alert("No Patient Entry Exists ! Please consult your doctor with this ID - "+pateintID);
+//							}
+//					  }
+//		});
+//	}
+//	
+//}
+//function subscribe()
+//{
+//	var globalarray = [];
+//	console.log($('input[name="locationthemes"]:checked').serialize());
+//	$('input[name="locationthemes"]:checked').each(function() {
+//		   console.log(this.value); 
+//		   var hello = this.value;
+//		   globalarray.push(hello);
+//		});
+//	var logggedin  = cookies.getRegistrationUrlCookie("cookie");
+//	var subscribe = "";
+//	for(var subs=0; subs<globalarray.length;subs++)
+//	{
+//		subscribe=subscribe+globalarray[subs]+",";
+//	}
+//	$.ajax({
+//		type	: 'POST', 
+//		url		: '/additional' ,
+//		async	: true,
+//		data	: {logggedin:logggedin,globalarray:subscribe},
+//		success	: function(data)
+//				  {
+//						$("#addbutton").on("click", function(e) {
+//							console.log("button pressed");   // just as an example...
+//							$("#addtionalsuccess").modal('hide'); 
+//						});
+//						$("#addfailbutton").on("click", function(e) {
+//							console.log("button pressed");   // just as an example...
+//							$("#addtionalfail").modal('hide'); 
+//						});
+//						if(data=="success")
+//						{
+//							$("#addtionalsuccess").modal({                    // wire up the actual modal functionality and show the dialog
+//								"backdrop"  : "static",
+//								"keyboard"  : true,
+//								"show"      : true                     // ensure the modal is shown immediately
+//							});
+//						}
+//						else
+//						{
+//							var pateintID = $('#hjbjbhj').val();
+//							var notedown = '<button type="button" class="close" data-dismiss="modal">&times;</button>'+
+//					        'No Patient Entry Exists ! Please consult your doctor with this ID -'+pateintID;
+//							$('#notedown').html(notedown);
+//							$("#addtionalfail").modal({                    // wire up the actual modal functionality and show the dialog
+//								"backdrop"  : "static",
+//								"keyboard"  : true,
+//								"show"      : true                     // ensure the modal is shown immediately
+//							});
+//						}
+//				  }
+//	});
+//	console.log("global array :: "+globalarray);
+//}
+//function reservation()
+//{
+//	var patientEmail 	= cookies.getRegistrationUrlCookie("cookie");
+//	var selectbox 		=  $( "#doctorslist option:selected" ).text();
+//	 console.log("the setdoctor mode :: "+selectbox);
+//	 $('#doctorname').val(selectbox);
+//	var doctorname		 =	$('#doctorname').val();
+//	var appdate		=	$('#reservationsys').val();
+//	console.log("donctorna :: "+doctorname);
+//	console.log("appdate :: "+appdate);
+//	
+//	$.ajax({
+//		type	: 'POST', 
+//		url		: '/appoinment' ,
+//		async	: true,
+//		data	: {patientEmail:patientEmail,doctorname:doctorname,appdates:appdate},
+//		success	: function(data)
+//				  {
+//						if(data!="failure")
+//						{
+//							alert("Apppoinment Set Successfully");
+//						}
+//						else
+//						{
+//							alert("No Such Patient Exists");
+//						}
+//				  }
+//	});
+//	
+//}
+//function fetchstatuss()
+//{
+//	var patientID	 = 	$('#exampleInputfetch').val();
+//	fetchstatus = "true";
+//	$.ajax({
+//		type	: 'POST', 
+//		url		: '/fetchstatus' ,
+//		async	: true,
+//		data	: {patientID:patientID},
+//		success	: function(data)
+//				  {
+//						alert(data);
+//						if(data!="failure")
+//						{
+//							var jsonvars	=	JSON.parse(data);
+//							for(index in jsonvars)
+//							{
+//								$('#patientname').val(jsonvars[index].name);
+//								$('#examplepatientID').val(jsonvars[index].patientID);
+//								$('#patientemail').val(jsonvars[index].email);
+//								$('#patientphone').val(jsonvars[index].phonenumber);
+//								$('#patientaddress').val(jsonvars[index].address);
+//							}
+//						}
+//						else
+//						{
+//							alert("No Patients have registerd with that ID");
+//						}
+//				  }
+//						
+//		});
+//}
+//function changestatus()
+//{
+//	 var selectbox 		=  $( "#myselect option:selected" ).text();
+//	 if(selectbox=="Doctor")
+//	 {
+//		 $('#patientpart').hide();
+//		 $('#doctorspart').show();
+//		 $('#doctorspartsignup').show();
+//			$('#patientpartsignup').hide();
+//	 }
+//	 else
+//	{
+//		 $('#patientpart').show();
+//		 $('#doctorspart').hide();
+//		 $('#doctorspartsignup').hide();
+//		$('#patientpartsignup').show();
+//	}
+//}
+//function callremedyteam()
+//{
+//	 var patientIDroll			=	 $('#hjbjbhj').val();
+//	 var patientemail 			=	 $('#patientemail').val();
+//	 var patientName 			=	 $('#patientname').val();
+//	 var bloodgroup				=	 $('#bloodgroup').val();
+//	 var pressure 				=	 $('#pressure').val();
+//	 var height					=	 $('#height').val();
+//	 var weight					=	 $('#weight').val();
+//	 var bmi					=	 $('#bmi').val();	
+//	 var surgerey				=	 $('input:radio[name=surgerys]:checked').val();
+//	 var excersise				=	 $('#excersise').val();
+//	 var problem				=	 $('#problem').val();
+//	 var gender					= 	 $('input:radio[name=optionsRadio]:checked').val();
+//	
+//	 if((patientIDroll=="") || (patientemail=="") || (patientName=="") || (bloodgroup=="")
+//			 || (pressure=="") || (height=="") || (weight=="")
+//			 || (bmi=="") || (excersise=="")|| (problem=="")  )
+//	  {
+//		 if(patientIDroll==null || patientIDroll=='')
+//			{
+//				$('#hjbjbhj').css('background-color','rgb(176, 199, 221)');
+//      			$('#hjbjbhj').css('color','black');
+//      			$('#hjbjbhj').val("Invalid Name");
+//			}
+//		 if(patientemail==null || patientemail=='')
+//			{
+//				$('#patientemail').css('background-color','rgb(176, 199, 221)');
+//      			$('#patientemail').css('color','black');
+//      			$('#patientemail').val("Invalid Email");
+//			}
+//		 if(patientName==null || patientName=='')
+//			{
+//				$('#patientname').css('background-color','rgb(176, 199, 221)');
+//      			$('#patientname').css('color','black');
+//      			$('#patientname').val("Invalid Text");
+//			}
+//		 if(bloodgroup==null || bloodgroup=='')
+//			{
+//				$('#bloodgroup').css('background-color','rgb(176, 199, 221)');
+//      			$('#bloodgroup').css('color','black');
+//      			$('#bloodgroup').val("Invalid Text");
+//			}
+//		 if(pressure==null || pressure=='')
+//			{
+//				$('#pressure').css('background-color','rgb(176, 199, 221)');
+//				$('#pressure').css('color','black');
+//				$('#pressure').val("Invalid Phone");
+//			}
+//		 if(height==null || height=='')
+//			{
+//				$('#height').css('background-color','rgb(176, 199, 221)');
+//				$('#height').css('color','black');
+//				$('#height').val("Invalid Address");
+//			}
+//		 if(weight==null || weight=='')
+//			{
+//				$('#weight').css('background-color','rgb(176, 199, 221)');
+//			$('#weight').css('color','black');
+//			$('#weight').val("Invalid Text");
+//			}
+//		 if(excersise==null || excersise=='')
+//		 {
+//				$('#excersise').css('background-color','rgb(176, 199, 221)');
+//			$('#excersise').css('color','black');
+//			$('#excersise').val("Invalid Text");
+//		 }
+//		 if(bmi==null || bmi=='')
+//			{
+//			$('#bmi').css('background-color','rgb(176, 199, 221)');
+//			$('#bmi').css('color','black');
+//			$('#bmi').val("Invalid Text");
+//			}
+//		 if(problem==null || problem=='')
+//			{
+//			$('#problem').css('background-color','rgb(176, 199, 221)');
+//			$('#problem').css('color','black');
+//			$('#problem').val("Invalid Text");
+//			}
+//	  }
+//	  else
+//		  {
+//		  		$.ajax({
+//				type	: 'POST', 
+//				url		: '/remedy' ,
+//				async	: true,
+//				data	: {patientIDroll:patientIDroll,patientemail:patientemail,patientName:patientName,bloodgroup:bloodgroup,pressure:pressure,height:height,weight:weight,bmi:bmi,surgerey:surgerey,excersise:excersise,problem:problem,gender:gender},
+//				success	: function(data)
+//						  {
+//								if(String(data).match("Failure"))
+//							    {
+//										$('#email').val("");
+//										$("#email").attr("placeholder","User Already Exists");
+//										$('#email').css({"background-color":"rgb(150, 98, 98)"});
+//										$('#password').val("");
+//										$('#firstname').val("");
+//								}
+//								else
+//								{
+//										alert("Registration Successfull, Your Records Saved");
+//								}
+//						  }
+//			});
+//		  }
+//}
